@@ -1,0 +1,46 @@
+trigger OpportunityLineItemTrigger on OpportunityLineItem (before insert,after insert,before delete,after update) {
+   /* if(trigger.isinsert && Trigger.isAfter)
+    {
+        OpportunityLineItemTriggerHandler.copyOpportunityFieldValue(Trigger.new,Trigger.oldMap);
+    }*/
+    /*if(trigger.isinsert && Trigger.isbefore)
+    {
+        OpportunityLineItemTriggerHandler.copyScheduleField(Trigger.new);
+    }*/
+    if(Trigger.isBefore){
+        if(Trigger.isUpdate || Trigger.isInsert){
+            OpportunityLineItemTriggerHandler.updateStartEndDates(Trigger.new);
+        }
+        if(trigger.isInsert){
+             OpportunityLineItemTriggerHandler.copyScheduleField(Trigger.new);
+        }
+    }
+    if(trigger.isDelete){
+        OpportunityLineItemTriggerHandler.preventProductDeletion(Trigger.Old, '100% Closed Won');
+    }
+    //Schedule
+   /* if(trigger.isUpdate)
+    {
+        if(!RecursiveTrigger.flag)
+        {
+          RecursiveTrigger.flag=true;
+          OpportunityLineItemScheduleHandler.createOrUpdateSchedule(Trigger.new,Trigger.oldMap,false);
+        }
+    }
+    */
+    if(trigger.isAfter){
+        if(Trigger.isInsert){
+            if(!RecursiveTrigger.flag){
+                RecursiveTrigger.flag=true;
+                OpportunityLineItemScheduleHandler.createOrUpdateSchedule(Trigger.new,Trigger.oldMap,true);
+               // OpportunityLineItemScheduleHandler.createOrUpdateSchedule(Trigger.new,Trigger.oldMap,false);
+            }
+        }
+        if(Trigger.isUpdate){
+            if(!RecursiveTrigger.flag){
+                RecursiveTrigger.flag=true; 
+                OpportunityLineItemTriggerHandler.adjustLineItemSchedules(Trigger.oldMap, Trigger.newMap);
+            }
+        }
+    }
+}
